@@ -50,6 +50,11 @@ the `_all.deb`, unsigned `.dsc`, orig/debian tarballs, binary/source `.changes`
 and `.buildinfo`, with complete SHA256SUMS. Lintian reported no errors or warnings.
 No source/package signatures have been added.
 
+Hosted GitHub Actions run
+[39098921676](https://github.com/pannal/realtek-r8125-dkms-v2/actions/runs/39098921676)
+also passed all four module build profiles and the unsigned package checks at
+`fa955dc` on 2026-10-18. These jobs do not install or load the driver.
+
 The disposable Ubuntu 26.04 root filesystem used real dpkg/APT, DKMS 3.2.2,
 Ubuntu 7.0.0-38 headers/image/modules and GCC 15. Older 5.15/6.8 header/compiler
 trees were additional compile fixtures. An unprivileged user/PID/network namespace
