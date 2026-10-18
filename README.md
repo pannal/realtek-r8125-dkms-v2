@@ -10,10 +10,12 @@ MSI-X use depend on the chip revision and successful vector allocation. The
 newer Realtek RX page reuse, DMA lifecycle and offload paths are retained.
 Performance improvements have **not** been established on hardware.
 
-This branch is for **build-only development**. Both this fork and the production
+This branch is an **experimental development candidate**. Both this fork and the production
 awesometic package build `r8125.ko`; they are not safely co-installable merely by
 renaming a package. Do not install this branch over a working network driver.
-The inherited package-release workflow has been removed, and the legacy
+Unsigned Debian source/binary packages can be built and tested locally. Experimental
+PPA publication is authorized before hardware validation; this does not establish
+runtime safety or authorize production installation. The inherited release workflow has been removed, and the legacy
 `autorun.sh` / DKMS install/remove helpers exit without changing the system.
 
 ## Build without installing
@@ -37,6 +39,19 @@ The CI matrix targets Ubuntu 22.04 GA (5.15), 24.04 GA (6.8) and 26.04 GA (7.0),
 plus the exact 7.0.0-38 headers with optional PTP. These are compile tests, not a
 claim of hardware support. Older kernels are outside this branch's validation
 scope; retained legacy conditionals do not establish compatibility.
+
+## Package preparation
+
+```bash
+scripts/build-packages.sh packages
+python3 tests/test_package_artifacts.py packages
+```
+
+This produces unsigned source-only DKMS packages for local validation. The
+optimized package deliberately conflicts with stock providers; installation is
+a separate operation. See [PPA packaging](docs/PPA-PACKAGING.md) for lifecycle
+evidence and publication prerequisites. Neither compilation nor package tests
+establish a reason to replace an already healthy production driver.
 
 See the [technical report](docs/RTL8125-9.018-PORT.md) for source comparison,
 modifications, validation limits, packaging recommendations and remaining tests.

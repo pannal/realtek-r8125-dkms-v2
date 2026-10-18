@@ -1,3 +1,13 @@
+realtek-r8125-optimized-dkms (9.018.00+opt1-0ppa1) resolute; urgency=medium
+
+  * Introduce an opt-in optimized 9.018 DKMS package with explicit provider
+    conflicts and a distinct DKMS/module version identity.
+  * Use the debhelper DKMS lifecycle once and install an audited source list.
+  * Prepare unsigned local source and binary packages for validation; no PPA
+    publication or production runtime validation is implied.
+
+ -- pannal <pgp@fragstore.net>  Sun, 18 Oct 2026 06:20:00 +0200
+
 realtek-r8125-dkms (9.018.00-1) stable; urgency=medium
 
   * Update Realtek r8125 driver to 9.018.00

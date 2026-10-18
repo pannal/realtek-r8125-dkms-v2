@@ -53,5 +53,5 @@ vermagic=$(modinfo -F vermagic "$output/r8125.ko")
     printf 'Kernel release: %s\n' "$target_release"
     printf 'PTP: %s\n' "$ptp"
     "$compiler" --version | head -1
-    sha256sum "$output/r8125.ko" "$repo/src/Makefile" "$repo/src/r8125_n.c"
+    sha256sum "$output/r8125.ko" "$repo/src/Makefile" "$repo/src/r8125_n.c" "$repo/src/r8125.h" "$repo/dkms.conf"
 } > "$output/manifest.txt"

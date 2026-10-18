@@ -1,16 +1,23 @@
-Source: realtek-r8125-dkms
-Section: contrib/kernel
+Source: realtek-r8125-optimized-dkms
+Section: kernel
 Priority: optional
-Maintainer: Deokgyu Yang <secugyu@gmail.com>
-Build-Depends: debhelper (>=11~), dkms (<< 3.0.3-3~) | dh-sequence-dkms
-Standards-Version: 4.6.2.1
-Homepage: https://github.com/awesometic/realtek-r8125-dkms
+Maintainer: pannal <pgp@fragstore.net>
+Build-Depends: debhelper-compat (= 13), dh-sequence-dkms
+Standards-Version: 4.7.3
+Rules-Requires-Root: no
+Homepage: https://github.com/pannal/realtek-r8125-dkms-v2
+Vcs-Git: https://github.com/pannal/realtek-r8125-dkms-v2.git -b realtek-9.018-optimized
+Vcs-Browser: https://github.com/pannal/realtek-r8125-dkms-v2
 
-Package: realtek-r8125-dkms
-Architecture: any
-Multi-Arch: foreign
-Depends: dkms (>= 1.95), ${misc:Depends}
-Description: Realtek RTL8125 driver in DKMS format
-  This package provides the source code for RTL8125 Linux driver that may
-  include supporting other Realtek 2.5 GbE chipsets to be build with dkms.
-  Kernel sources or headers are required to compile this module.
+Package: realtek-r8125-optimized-dkms
+Architecture: all
+Depends: ${misc:Depends}
+Conflicts: realtek-r8125-dkms, r8125-dkms
+Description: experimental optimized Realtek RTL8125 driver source for DKMS
+ Realtek 9.018-based PCIe Ethernet driver with RSS, multiple transmit queues
+ and selected reliability improvements. DKMS builds r8125 for local kernels.
+ .
+ This package replaces other providers of r8125.ko; differently named packages
+ cannot safely install that module together. Hardware validation is required
+ before production deployment. Kernel headers and a suitable compiler are
+ required for each kernel being built.

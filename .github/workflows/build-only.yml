@@ -74,3 +74,25 @@ jobs:
           path: build/
           if-no-files-found: ignore
           retention-days: 14
+
+  package:
+    name: Ubuntu 26.04 unsigned package checks (no installation)
+    runs-on: ubuntu-24.04
+    container: ubuntu:26.04
+    steps:
+      - name: Install packaging tools in disposable CI container
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update
+          apt-get install --no-install-recommends -y \
+            ca-certificates git build-essential debhelper dh-dkms python3 lintian
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Build unsigned source and binary packages
+        run: scripts/build-packages.sh packages
+      - name: Inspect real artifacts and generated maintainer scripts
+        run: |
+          python3 tests/test_package_artifacts.py packages
+          lintian --allow-root packages/*_amd64.changes packages/*_source.changes

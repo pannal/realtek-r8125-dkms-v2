@@ -4,7 +4,7 @@
 /debian/files
 /debian/*.debhelper.log
 /debian/*.substvars
-/debian/realtek-r8125-dkms/
+/debian/realtek-r8125-optimized-dkms/
 
 # External-module build products
 /src/*.o
@@ -16,3 +16,6 @@
 /src/modules.order
 /src/.tmp_versions/
 /build/
+
+/packages/
+/debian/*.dkms.debhelper

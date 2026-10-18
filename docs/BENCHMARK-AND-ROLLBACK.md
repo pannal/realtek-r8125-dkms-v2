@@ -43,6 +43,22 @@ production host requires explicit approval for that operation.
 
 ## Establish a reproducible baseline in the lab
 
+### First activation before reboot
+
+After the recovery gate passes, test the candidate by a separately approved
+controlled module reload from the independent console. Keep the exact known-good
+package and recovery assets available offline. Installing a package changes the
+module on disk; it does not prove that the running module changed. Check the
+loaded driver's `+opt1` version, actual queue/vector counts, kernel messages,
+connectivity and counters, then run the traffic checks below. Restore the stock
+driver immediately if identity, connectivity or error checks fail.
+
+Do not reboot into the candidate before this initial hardware check passes.
+A successful reload still leaves boot/initramfs selection and cold-start
+behavior unverified; test those later in a separately approved maintenance step.
+
+### Traffic baseline
+
 Use a representative RTL8125 silicon revision and IOMMU configuration, the
 production kernel ABI, the known-good 9.018 driver, a peer that sustains more than
 2.5 Gbit/s, and a known-good cable/switch path. Record CPU, PCIe link, firmware,
@@ -116,8 +132,9 @@ and APT archive verification are separate from Secure Boot module signing.
 Before any upload, finalize package identity/versioning, conflict/migration rules,
 source provenance and generated maintainer scripts; validate the complete DKMS
 lifecycle in disposable Ubuntu environments. Do not enable an automated publishing
-workflow while runtime acceptance is outstanding. The current branch's CI only
-retains uninstalled `.ko` build artifacts and does not create or upload packages.
+workflow while runtime acceptance is outstanding. The current CI retains uninstalled `.ko` build evidence and separately builds
+and inspects unsigned packages. It does not install, release or upload packages
+to an APT repository or PPA.
 
 For the production server, prepare exact commands from the resulting validated
 package and observed installed state. The eventual maintenance window consists of
@@ -131,5 +148,6 @@ behavior before acceptance or cancellation of any tested rollback deadline.
 Do not run inherited `autorun.sh` or ad hoc module replacement over SSH. The
 legacy install/remove helpers on this branch are disabled. Explicit `make install`
 and Debian/DKMS maintainer operations are still state-changing and are outside
-this development task. No PPA has been created or published, and no production
-operation in this procedure has been performed.
+this development task. Experimental PPA publication is authorized with the
+pre-publication runtime gate explicitly waived; production writes remain subject
+to individual approval. No production operation in this procedure has been performed.

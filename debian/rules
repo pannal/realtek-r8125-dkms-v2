@@ -1,28 +1,22 @@
 #!/usr/bin/make -f
 
-#export DH_VERBOSE=1
-
-#just use base version
-VERSION	:= $(shell dpkg-parsechangelog -S Version | sed 's/-.*//' | sed 's/+pristine//')
+VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/-[^-]*$$//')
+DKMS_SOURCE := usr/src/realtek-r8125-optimized-$(VERSION)
+MODULE_SOURCES := $(shell cat debian/module-source-files)
 
 %:
-	dh $@ --parallel --with dkms
+	dh $@
 
 override_dh_install:
-	dh_install dkms.conf REALTEK_README.txt Makefile usr/src/realtek-r8125-$(VERSION)
-	dh_install src/* usr/src/realtek-r8125-$(VERSION)/src
-
-override_dh_dkms:
-	dh_dkms -V $(VERSION)
+	dh_install Makefile $(DKMS_SOURCE)
+	dh_install $(MODULE_SOURCES) $(DKMS_SOURCE)/src
 
 override_dh_fixperms:
 	dh_fixperms
-	find debian/realtek-r8125-dkms/usr/src -type f -exec chmod -x {} \;
+	find debian/realtek-r8125-optimized-dkms/usr/src -type f -exec chmod 0644 {} +
 
-override_dh_builddeb:
-	dh_builddeb -- -Zxz
-
-# Nothing to configure, build or auto-install
+# dh_dkms installs dkms.conf and generates the sole package lifecycle.
+# Module compilation happens at DKMS installation, never at package build time.
 override_dh_auto_configure:
 override_dh_auto_build:
 override_dh_auto_test:

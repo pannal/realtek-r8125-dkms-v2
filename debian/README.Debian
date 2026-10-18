@@ -1,5 +1,15 @@
-realtek-r8125-dkms for Debian
+realtek-r8125-optimized-dkms
+==========================
 
-This installs a DKMS for Realtek r8125 drivers.
+Experimental source-only DKMS replacement for r8125. Known package providers
+realtek-r8125-dkms and r8125-dkms conflict deliberately; unmanaged module copies
+or other DKMS registrations must also be removed through a validated migration.
 
- -- Deokgyu Yang <secugyu@gmail.com>  Fri, 12 Jun 2020 12:27:29 +0900
+This package does not blacklist r8169, change routes/offloads/IRQ policy, or
+explicitly unload/load NIC drivers. Standard DKMS framework/kernel hooks remain
+active and depend on system configuration. Installing may rebuild modules and
+change the module selected on the next load/boot. Secure Boot requires a trusted
+module signing key, independently of source/PPA archive signatures.
+
+Read PPA-PACKAGING.md and BENCHMARK-AND-ROLLBACK.md before installation. The
+package is not a claim of hardware acceptance or a tested recovery route.

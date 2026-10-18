@@ -1,6 +1,14 @@
-realtek-r8125-dkms for Debian
+This is the pannal optimized fork of Realtek 9.018, based on awesometic commit
+9a152bf920334aead090d2fb4d91f67a84923123 and selected ewaldc 9.014 concepts.
+Driver changes were independently reviewed and compile-tested at f07eec4;
+subsequent packaging changes add a module version suffix, not a new datapath.
 
-The driver source can be found here:
- https://www.realtek.com/en/component/zoo/category/network-interface-controllers-10-100-1000m-gigabit-ethernet-pci-express-software
+scripts/build-packages.sh constructs a pristine tree from debian/source-manifest,
+then a non-native 3.0(quilt) orig tarball and unsigned source/binary packages.
+Build products, Git metadata and private context are not inputs. No network,
+signing or upload occurs in that script. A verified Launchpad identity/signing
+key and separate publication approval are needed before uploading.
 
- -- Deokgyu Yang <secugyu@gmail.com>  Fri, 12 Jun 2020 12:27:29 +0900
+Source headers contain GPL-2.0-only SPDX identifiers and historical 'or later'
+prose. Notices are preserved; packaging uses the conservative GPL-2 license.
+Optional REALWOW source is absent from the baseline; that option stays disabled.
