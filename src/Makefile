@@ -41,9 +41,9 @@ ENABLE_S5_KEEP_CURR_MAC = n
 ENABLE_EEE = y
 ENABLE_S0_MAGIC_PACKET = n
 ENABLE_TX_NO_CLOSE = y
-ENABLE_MULTIPLE_TX_QUEUE = n
+ENABLE_MULTIPLE_TX_QUEUE = y
 ENABLE_PTP_SUPPORT = n
-ENABLE_RSS_SUPPORT = n
+ENABLE_RSS_SUPPORT = y
 ENABLE_LIB_SUPPORT = n
 ENABLE_USE_FIRMWARE_FILE = n
 DISABLE_WOL_SUPPORT = n
@@ -57,83 +57,80 @@ ifneq ($(KERNELRELEASE),)
 	obj-m := r8125.o
 	r8125-objs := r8125_n.o rtl_eeprom.o rtltool.o
 	ifeq ($(CONFIG_SOC_LAN), y)
-		EXTRA_CFLAGS += -DCONFIG_SOC_LAN
+		ccflags-y += -DCONFIG_SOC_LAN
 	endif
 	ifeq ($(ENABLE_FIBER_SUPPORT), y)
 		r8125-objs += r8125_fiber.o
-		EXTRA_CFLAGS += -DENABLE_FIBER_SUPPORT
+		ccflags-y += -DENABLE_FIBER_SUPPORT
 	endif
 	ifeq ($(ENABLE_REALWOW_SUPPORT), y)
 		r8125-objs += r8125_realwow.o
-		EXTRA_CFLAGS += -DENABLE_REALWOW_SUPPORT
+		ccflags-y += -DENABLE_REALWOW_SUPPORT
 	endif
 	ifeq ($(ENABLE_DASH_SUPPORT), y)
 		r8125-objs += r8125_dash.o
-		EXTRA_CFLAGS += -DENABLE_DASH_SUPPORT
+		ccflags-y += -DENABLE_DASH_SUPPORT
 	endif
-	EXTRA_CFLAGS += -DCONFIG_R8125_NAPI
-	EXTRA_CFLAGS += -DCONFIG_R8125_VLAN
+	ccflags-y += -DCONFIG_R8125_NAPI
+	ccflags-y += -DCONFIG_R8125_VLAN
 	ifeq ($(CONFIG_DOWN_SPEED_100), y)
-		EXTRA_CFLAGS += -DCONFIG_DOWN_SPEED_100
+		ccflags-y += -DCONFIG_DOWN_SPEED_100
 	endif
 	ifeq ($(CONFIG_ASPM), y)
-		EXTRA_CFLAGS += -DCONFIG_ASPM
+		ccflags-y += -DCONFIG_ASPM
 	endif
 	ifeq ($(ENABLE_S5WOL), y)
-		EXTRA_CFLAGS += -DENABLE_S5WOL
+		ccflags-y += -DENABLE_S5WOL
 	endif
 	ifeq ($(ENABLE_S5_KEEP_CURR_MAC), y)
-		EXTRA_CFLAGS += -DENABLE_S5_KEEP_CURR_MAC
+		ccflags-y += -DENABLE_S5_KEEP_CURR_MAC
 	endif
 	ifeq ($(ENABLE_EEE), y)
-		EXTRA_CFLAGS += -DENABLE_EEE
+		ccflags-y += -DENABLE_EEE
 	endif
 	ifeq ($(ENABLE_S0_MAGIC_PACKET), y)
-		EXTRA_CFLAGS += -DENABLE_S0_MAGIC_PACKET
+		ccflags-y += -DENABLE_S0_MAGIC_PACKET
 	endif
 	ifeq ($(ENABLE_TX_NO_CLOSE), y)
-		EXTRA_CFLAGS += -DENABLE_TX_NO_CLOSE
+		ccflags-y += -DENABLE_TX_NO_CLOSE
 	endif
 	ifeq ($(ENABLE_MULTIPLE_TX_QUEUE), y)
-		EXTRA_CFLAGS += -DENABLE_MULTIPLE_TX_QUEUE
+		ccflags-y += -DENABLE_MULTIPLE_TX_QUEUE
 	endif
 	ifeq ($(ENABLE_PTP_SUPPORT), y)
 		r8125-objs += r8125_ptp.o
-		EXTRA_CFLAGS += -DENABLE_PTP_SUPPORT
+		ccflags-y += -DENABLE_PTP_SUPPORT
 	endif
 	ifeq ($(ENABLE_RSS_SUPPORT), y)
 		r8125-objs += r8125_rss.o
-		EXTRA_CFLAGS += -DENABLE_RSS_SUPPORT
+		ccflags-y += -DENABLE_RSS_SUPPORT
 	endif
 	ifeq ($(ENABLE_LIB_SUPPORT), y)
 		r8125-objs += r8125_lib.o
-		EXTRA_CFLAGS += -DENABLE_LIB_SUPPORT
+		ccflags-y += -DENABLE_LIB_SUPPORT
 	endif
 	ifeq ($(ENABLE_USE_FIRMWARE_FILE), y)
 		r8125-objs += r8125_firmware.o
-		EXTRA_CFLAGS += -DENABLE_USE_FIRMWARE_FILE
+		ccflags-y += -DENABLE_USE_FIRMWARE_FILE
 	endif
 	ifeq ($(DISABLE_WOL_SUPPORT), y)
-		EXTRA_CFLAGS += -DDISABLE_WOL_SUPPORT
+		ccflags-y += -DDISABLE_WOL_SUPPORT
 	endif
 	ifeq ($(DISABLE_MULTI_MSIX_VECTOR), y)
-		EXTRA_CFLAGS += -DDISABLE_MULTI_MSIX_VECTOR
+		ccflags-y += -DDISABLE_MULTI_MSIX_VECTOR
 	endif
 	ifeq ($(ENABLE_DOUBLE_VLAN), y)
-		EXTRA_CFLAGS += -DENABLE_DOUBLE_VLAN
+		ccflags-y += -DENABLE_DOUBLE_VLAN
 	endif
 	ifeq ($(ENABLE_PAGE_REUSE), y)
-		EXTRA_CFLAGS += -DENABLE_PAGE_REUSE
+		ccflags-y += -DENABLE_PAGE_REUSE
 	endif
 	ifeq ($(ENABLE_RX_PACKET_FRAGMENT), y)
-		EXTRA_CFLAGS += -DENABLE_RX_PACKET_FRAGMENT
+		ccflags-y += -DENABLE_RX_PACKET_FRAGMENT
 	endif
 	ifeq ($(ENABLE_GIGA_LITE), y)
-		EXTRA_CFLAGS += -DENABLE_GIGA_LITE
+		ccflags-y += -DENABLE_GIGA_LITE
 	endif
-
-	# Backward compatibility
-	ccflags-y  += $(EXTRA_CFLAGS)
 else
 	BASEDIR := /lib/modules/$(shell uname -r)
 	KERNELDIR ?= $(BASEDIR)/build
@@ -168,7 +165,7 @@ else
 	)
 
 .PHONY: all
-all: print_vars clean modules install
+all: modules
 
 print_vars:
 	@echo

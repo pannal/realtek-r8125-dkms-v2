@@ -15773,7 +15773,12 @@ rtl8125_init_software_variable(struct net_device *dev)
 #else
         if (tp->HwSuppRssVer > 0 && tp->HwCurrIsrVer > 1) {
                 u16 rss_queue_num = netif_get_num_default_rss_queues();
-                tp->num_rx_rings = min(tp->HwSuppNumRxQueues, rss_queue_num);
+                /* Hardware encodes log2(queue count); the indirection
+                 * table must never refer to an unconfigured queue.
+                 */
+                rss_queue_num = min(tp->HwSuppNumRxQueues, rss_queue_num);
+                if (rss_queue_num >= 2)
+                        tp->num_rx_rings = rounddown_pow_of_two(rss_queue_num);
                 if (!(tp->num_rx_rings >= 2 && tp->irq_nvecs >= tp->num_rx_rings))
                         tp->num_rx_rings = 1;
 
@@ -17608,6 +17613,9 @@ static int rtl8125_try_msi(struct rtl8125_private *tp)
         else if ((nvecs = pci_alloc_irq_vectors(pdev, 1, 1, PCI_IRQ_ALL_TYPES)) > 0 &&
                  pci_dev_msi_enabled(pdev))
                 msi |= RTL_FEATURE_MSI;
+
+        if (nvecs < 0)
+                return nvecs;
 #elif LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
         if ((nvecs = rtl8125_enable_msix(tp)) > 0)
                 msi |= RTL_FEATURE_MSIX;
@@ -17886,15 +17894,22 @@ static int rtl8125_poll_msix_other(napi_ptr napi, napi_budget budget)
         (void)(dev);
         (void)(work_to_do);
 
+        /* No RX packets are processed by an auxiliary vector. A zero
+         * budget must not complete NAPI or rearm the interrupt.
+         */
+        if (!work_to_do)
+                return 0;
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,10,0)
-        RTL_NETIF_RX_COMPLETE(dev, napi, work_to_do);
+        if (!RTL_NETIF_RX_COMPLETE(dev, napi, 0))
+                return 0;
 #else
-        RTL_NETIF_RX_COMPLETE(dev, napi, work_to_do);
+        RTL_NETIF_RX_COMPLETE(dev, napi, 0);
 #endif
 
         rtl8125_enable_hw_interrupt_v2(tp, message_id);
 
-        return 1;
+        return 0;
 }
 
 static int rtl8125_poll_msix_rx(napi_ptr napi, napi_budget budget)
@@ -18009,7 +18024,13 @@ static void rtl8125_init_napi(struct rtl8125_private *tp)
                         }
                 }
 
-                RTL_NAPI_CONFIG(tp->dev, r8125napi, poll, R8125_NAPI_WEIGHT);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,0)
+                if (poll == rtl8125_poll_msix_tx)
+                        netif_napi_add_tx_weight(tp->dev, &r8125napi->napi,
+                                                 poll, R8125_NAPI_WEIGHT);
+                else
+#endif
+                        RTL_NAPI_CONFIG(tp->dev, r8125napi, poll, R8125_NAPI_WEIGHT);
 #endif
 
                 r8125napi->priv = tp;
@@ -20220,19 +20241,13 @@ __be16 get_protocol(struct sk_buff *skb)
 
 static bool rtl8125_skb_pad_with_len(struct sk_buff *skb, unsigned int len)
 {
-        if (skb_padto(skb, len))
-                return false;
-        skb_put(skb, len - skb->len);
-        return true;
+        /* start_xmit owns the skb, including on padding failure. */
+        return !__skb_put_padto(skb, len, false);
 }
 
 static bool rtl8125_skb_pad(struct sk_buff *skb)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0)
         return rtl8125_skb_pad_with_len(skb, ETH_ZLEN);
-#else
-        return !eth_skb_pad(skb);
-#endif
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,0)
@@ -20548,11 +20563,14 @@ rtl8125_tso_csum(struct sk_buff *skb,
 
         if (sw_calc_csum) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,10) && LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,7)
-                skb_checksum_help(&skb, 0);
+                if (skb_checksum_help(&skb, 0))
+                        return false;
 #elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) && LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,10)
-                skb_checksum_help(skb, 0);
+                if (skb_checksum_help(skb, 0))
+                        return false;
 #else
-                skb_checksum_help(skb);
+                if (skb_checksum_help(skb))
+                        return false;
 #endif
         } else
                 opts[1] |= csum_cmd;
@@ -21070,6 +21088,9 @@ rtl8125_rx_skb(struct rtl8125_private *tp,
                struct sk_buff *skb,
                u32 ring_index)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,30)
+        skb_record_rx_queue(skb, ring_index);
+#endif
 #ifdef CONFIG_R8125_NAPI
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
         netif_receive_skb(skb);

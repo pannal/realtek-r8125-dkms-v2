@@ -30,10 +30,12 @@
 #  US6,570,884, US6,115,776, and US6,327,625.
 ################################################################################
 
-KFLAG := 2$(shell "$KVER" | sed -ne 's/^2\.[4]\..*/4/p')x
+KFLAG := $(if $(filter 2.4.%,$(KVER)),24x,26x)
 BSRC ?= /lib/modules/$(shell uname -r)
 
-all: clean modules install
+.PHONY: all modules clean install
+
+all: modules
 
 modules:
 ifeq ($(KFLAG),24x)
